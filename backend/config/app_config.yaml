@@ -1,0 +1,10 @@
+ app:
+   name: Velora
+   version: 0.1.0
+ simulation:
+   dt: 0.01
+   seed: 1234
+ telemetry:
+   broadcast_hz: 20
+
+
