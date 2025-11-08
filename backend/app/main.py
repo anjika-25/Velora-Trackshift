@@ -43,7 +43,21 @@ except ModuleNotFoundError:
 
 logger = get_logger(__name__)
 
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+# Configure CORS origins
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001"
+]
+
+# Configure Socket.IO with CORS (single initialization)
+sio = socketio.AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins=origins,
+    logger=True,
+    engineio_logger=True
+)
 
 
 @asynccontextmanager
@@ -61,9 +75,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Velora Racing Simulator", version="0.1.0", lifespan=lifespan)
 
+# Configure CORS for FastAPI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -76,8 +91,10 @@ app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
 app.include_router(telemetry_router, prefix="/api/telemetry", tags=["telemetry"])
 app.include_router(weather_router, prefix="/api/weather", tags=["weather"])
 
-# Expose Socket.IO app
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
+# Create Socket.IO app and mount FastAPI
+# Keep reference to FastAPI app for state management
+fastapi_app = app
+socket_app = socketio.ASGIApp(sio, app)
 
 
 def parse_args() -> argparse.Namespace:
@@ -107,8 +124,8 @@ async def disconnect(sid):  # type: ignore[no-untyped-def]
 def main() -> None:
     args = parse_args()
     seed_all(args.seed)
-    # Save defaults in app state for APIs to access
-    app.state.default_args = args
+    # Save defaults in FastAPI app state for APIs to access
+    fastapi_app.state.default_args = args
     uvicorn.run(socket_app, host=args.host, port=args.port, log_level="info")
 
 

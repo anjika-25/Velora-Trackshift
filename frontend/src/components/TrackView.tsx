@@ -1,159 +1,244 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import * as d3 from 'd3';
 import { Track, Car } from '../types/models';
-import { Point, Point2D } from '../types/d3';
-import '../styles/dashboard.css';
-
 
 interface TrackViewProps {
-  track?: Track;
+  track: Track;
   cars?: Car[];
   onCarClick?: (carId: string) => void;
 }
 
-export function TrackView({ track, cars, onCarClick }: TrackViewProps) {
+// Simple 2D Point type for D3
+type Point = [number, number];
+
+export const TrackView: React.FC<TrackViewProps> = ({ track, cars = [], onCarClick }) => {
   const ref = useRef<SVGSVGElement | null>(null);
   const animationRef = useRef<number>();
+  const trackPathRef = useRef<d3.Path | null>(null);
+  const trackLengthRef = useRef<number>(0);
 
-  if (!track) {
-    return (
-      <div className="trackView">
-        <div className="loadingMessage">Loading track...</div>
-      </div>
-    );
-  }
+  const width = 900;
+  const height = 600;
 
+  // Generate smooth track path from checkpoints (like Python's spline)
+  const generateTrackPath = (checkpoints: [number, number, number][]): Point[] => {
+    if (checkpoints.length < 3) return checkpoints.map(([x, y]) => [x, y] as Point);
+    
+    // Convert to 2D points
+    const points = checkpoints.map(([x, y]) => [x, y] as Point);
+    
+    // Use Catmull-Rom spline to create smooth closed track (like Python)
+    const line = d3.line<Point>()
+      .x((d: Point) => d[0] * (width * 0.8) + width * 0.1)
+      .y((d: Point) => d[1] * (height * 0.8) + height * 0.1)
+      .curve(d3.curveCatmullRomClosed);
+    
+    return points;
+  };
+
+  // Get point along track path at normalized position (0-1)
+  const getPointOnTrack = (normalizedPosition: number): Point => {
+    const checkpoints = track.checkpoints;
+    if (checkpoints.length === 0) return [0.5, 0.5] as Point;
+    
+    // Wrap position to 0-1
+    let pos = normalizedPosition % 1;
+    if (pos < 0) pos += 1;
+    
+    // Calculate which segment and position within segment
+    const totalSegments = checkpoints.length;
+    const segmentIndex = Math.floor(pos * totalSegments) % totalSegments;
+    const nextIndex = (segmentIndex + 1) % totalSegments;
+    const segmentPos = (pos * totalSegments) % 1;
+    
+    // Interpolate between checkpoints
+    const [x1, y1] = checkpoints[segmentIndex];
+    const [x2, y2] = checkpoints[nextIndex];
+    
+    const x = x1 + (x2 - x1) * segmentPos;
+    const y = y1 + (y2 - y1) * segmentPos;
+    
+    return [x, y] as Point;
+  };
+
+  // D3 Setup Effect - Render track like Python (single track with glow)
   useEffect(() => {
     if (!ref.current) return;
 
     const svg = d3.select(ref.current);
-    const width = 900;
-    const height = 600;
-
-    // Clear existing content
     svg.selectAll('*').remove();
     svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-    // Define gradient for track surface
     const defs = svg.append('defs');
     
-    // Track surface gradient
-    const trackGradient = defs.append('linearGradient')
-      .attr('id', 'trackSurface')
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '0%')
-      .attr('y2', '100%');
-
-    trackGradient.append('stop')
-      .attr('offset', '0%')
-      .attr('style', 'stop-color:#4a4a4a;stop-opacity:1');
-    trackGradient.append('stop')
-      .attr('offset', '100%')
-      .attr('style', 'stop-color:#2a2a2a;stop-opacity:1');
-
-    // Create 3D-like track from checkpoints
-    const trackPoints = track.checkpoints;
+    // Convert checkpoints to 2D points
+    const points2D = track.checkpoints.map(([x, y]) => [x, y] as Point);
+    
+    // Create smooth closed path (like Python's Catmull-Rom spline)
     const line = d3.line<Point>()
       .x((d: Point) => d[0] * (width * 0.8) + width * 0.1)
       .y((d: Point) => d[1] * (height * 0.8) + height * 0.1)
       .curve(d3.curveCatmullRomClosed);
 
-    // Draw track outline (shadow)
-    svg.append('path')
-      .datum(trackPoints)
-      .attr('d', line)
-      .attr('transform', 'translate(4, 4)')
-      .attr('stroke', '#000')
-      .attr('stroke-width', 44)
-      .attr('fill', 'none')
-      .attr('filter', 'blur(4px)')
-      .attr('opacity', 0.3);
-
-    // Draw track base
-    svg.append('path')
-      .datum(trackPoints)
-      .attr('d', line)
-      .attr('stroke', 'url(#trackSurface)')
-      .attr('stroke-width', 40)
-      .attr('fill', 'none');
-
-    // Draw track edges
-    svg.append('path')
-      .datum(trackPoints)
-      .attr('d', line)
-      .attr('stroke', '#555')
-      .attr('stroke-width', 42)
-      .attr('stroke-opacity', 0.5)
-      .attr('fill', 'none');
-
-    // Draw pit lane
-    if (track.pitLane) {
-      const pitEntry: Point2D = [
-        track.pitLane.entry[0] * (width * 0.8) + width * 0.1,
-        track.pitLane.entry[1] * (height * 0.8) + height * 0.1
-      ];
-      const pitExit: Point2D = [
-        track.pitLane.exit[0] * (width * 0.8) + width * 0.1,
-        track.pitLane.exit[1] * (height * 0.8) + height * 0.1
-      ];
-
-      svg.append('line')
-        .attr('x1', pitEntry[0])
-        .attr('y1', pitEntry[1])
-        .attr('x2', pitExit[0])
-        .attr('y2', pitExit[1])
-        .attr('stroke', '#6b7280')
-        .attr('stroke-width', 20)
-        .attr('stroke-dasharray', '4 4');
+    // Store path for car positioning
+    const pathData = line(points2D);
+    if (pathData) {
+      const path = d3.path();
+      pathData.split(' ').forEach((cmd: string) => {
+        // Simple path parsing - for smooth curves
+      });
+      trackPathRef.current = path;
     }
 
-    // Create car elements
-    const carGroups = svg.selectAll<SVGGElement, Car>('g.car')
-      .data(cars)
-      .join('g')
-      .attr('class', 'car')
-      .style('cursor', 'pointer')
-      .on('click', (_: Event, d: Car) => onCarClick?.(d.id));
+    // Calculate track length
+    trackLengthRef.current = track.checkpoints.length;
 
-    // Car shadows
-    carGroups.append('circle')
-      .attr('r', 8)
-      .attr('fill', '#000')
-      .attr('opacity', 0.3)
-      .attr('filter', 'blur(2px)');
+    // Background - black like Python
+    svg.append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('fill', '#000000');
 
-    // Car bodies
-    carGroups.append('path')
-      .attr('d', 'M-6,-3 L6,-3 L8,0 L6,3 L-6,3 L-8,0 Z')
-      .attr('fill', (_: Car, i: number) => d3.schemeTableau10[i % 10])
-      .attr('stroke', '#000')
-      .attr('stroke-width', 1);
+    // Multi-layer track glow (like Python: white with different opacities and widths)
+    // Layer 1: Outer glow (thick, low opacity)
+    svg.append('path')
+      .datum(points2D)
+      .attr('d', line)
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 12)
+      .attr('fill', 'none')
+      .attr('opacity', 0.08);
 
-    // Update car positions
-    const updateCars = () => {
-      cars && carGroups
-        .attr('transform', (d: Car) => {
-          const x = d.position[0] * (width * 0.8) + width * 0.1;
-          const y = d.position[1] * (height * 0.8) + height * 0.1;
-          const angle = Math.atan2(d.velocity[1], d.velocity[0]) * (180 / Math.PI);
-          return `translate(${x},${y}) rotate(${angle})`;
-        });
+    // Layer 2: Mid glow
+    svg.append('path')
+      .datum(points2D)
+      .attr('d', line)
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 8)
+      .attr('fill', 'none')
+      .attr('opacity', 0.25);
 
-      animationRef.current = requestAnimationFrame(updateCars);
-    };
+    // Layer 3: Main track
+    svg.append('path')
+      .datum(points2D)
+      .attr('d', line)
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 5)
+      .attr('fill', 'none')
+      .attr('opacity', 0.6);
 
-    updateCars();
+    // Layer 4: Yellow dashed center line (like Python)
+    svg.append('path')
+      .datum(points2D)
+      .attr('d', line)
+      .attr('stroke', '#ffff00')
+      .attr('stroke-width', 1)
+      .attr('fill', 'none')
+      .attr('opacity', 0.4)
+      .attr('stroke-dasharray', '4,4');
+
+  }, [track]);
+
+  // Car Drawing and Animation Effect
+  useEffect(() => {
+    if (!ref.current) return;
+
+    let animationFrameId: number;
+    const svg = d3.select(ref.current);
+    let carGroups: d3.Selection<SVGGElement, Car, SVGElement, unknown>;
+
+    try {
+      // Join data for car groups
+      carGroups = svg.selectAll<SVGGElement, Car>('g.car')
+        .data(cars || [], (d: Car) => d.id)
+        .join(
+          (enter: d3.Selection<d3.EnterElement, Car, SVGElement, unknown>) => {
+            const group = enter.append('g')
+              .attr('class', 'car')
+              .style('cursor', 'pointer')
+              .on('click', (_event: MouseEvent, d: Car) => {
+                if (onCarClick) onCarClick(d.id);
+              });
+
+            // Car dot (like Python: circular with white border)
+            group.append('circle')
+              .attr('r', 9)
+              .attr('fill', (d: Car) => d.color || '#ff0000')
+              .attr('stroke', '#ffffff')
+              .attr('stroke-width', 2);
+
+            return group;
+          },
+          (update: d3.Selection<SVGGElement, Car, SVGElement, unknown>) => update,
+          (exit: d3.Selection<SVGGElement, Car, SVGElement, unknown>) => exit.remove()
+        );
+
+      const updateCars = () => {
+        if (carGroups) {
+          carGroups.attr('transform', (d: Car & { trackPosition?: number }) => {
+            // Use trackPosition if available (from RaceDashboard), otherwise calculate from position
+            let trackPosition: number;
+            if (d.trackPosition !== undefined) {
+              trackPosition = d.trackPosition;
+            } else if (d.position && Array.isArray(d.position) && d.position.length >= 2) {
+              // Find closest checkpoint to current position
+              let minDist = Infinity;
+              let closestIndex = 0;
+              track.checkpoints.forEach((checkpoint, idx) => {
+                const [cx, cy] = checkpoint;
+                const dist = Math.sqrt(
+                  Math.pow(cx - d.position[0], 2) + Math.pow(cy - d.position[1], 2)
+                );
+                if (dist < minDist) {
+                  minDist = dist;
+                  closestIndex = idx;
+                }
+              });
+              trackPosition = closestIndex / track.checkpoints.length;
+            } else {
+              trackPosition = 0;
+            }
+            
+            // Get point on track at this position
+            const point = getPointOnTrack(trackPosition);
+            const x = point[0] * (width * 0.8) + width * 0.1;
+            const y = point[1] * (height * 0.8) + height * 0.1;
+            
+            return `translate(${x},${y})`;
+          });
+
+          if (cars && cars.length > 0) {
+            animationFrameId = requestAnimationFrame(updateCars);
+          }
+        }
+      };
+
+      updateCars();
+    } catch (error) {
+      console.error('Error rendering cars:', error);
+    }
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [track, cars, onCarClick]);
+  }, [cars, track]);
 
-  return <svg ref={ref} className="trackCanvas" />
- }
+  const memoizedOnCarClick = useCallback((carId: string) => {
+    if (onCarClick) {
+      onCarClick(carId);
+    }
+  }, [onCarClick]);
 
-
-
+  return (
+    <div className="w-full h-full relative">
+      <svg 
+        ref={ref} 
+        className="track-canvas w-full h-full"
+        style={{ background: 'transparent' }}
+        aria-label="Race track visualization"
+      />
+    </div>
+  );
+};

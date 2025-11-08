@@ -1,29 +1,34 @@
- {
+{
    "name": "velora-frontend",
    "version": "0.1.0",
    "private": true,
    "type": "module",
    "scripts": {
-     "dev": "vite",
-     "build": "tsc && vite build",
-     "preview": "vite preview",
-     "test": "vitest"
+      "dev": "vite",
+      "build": "tsc && vite build",
+      "preview": "vite preview",
+      "test": "vitest"
    },
    "dependencies": {
-     "react": "18.3.1",
-     "react-dom": "18.3.1",
-     "d3": "7.9.0",
-     "socket.io-client": "4.7.5",
-     "chart.js": "4.4.4",
-     "golden-layout": "2.6.0"
+      "@types/chart.js": "^2.9.41",
+      "chart.js": "^4.4.0",
+      "d3": "^7.8.5",
+      "framer-motion": "^10.16.4",
+      "golden-layout": "^2.6.0",
+      "react": "^18.2.0",
+      "react-chartjs-2": "^5.2.0",
+      "react-dom": "^18.2.0",
+      "socket.io-client": "^4.7.2"
    },
    "devDependencies": {
-     "typescript": "5.6.3",
-     "vite": "5.4.8",
-     "@types/react": "18.3.5",
-     "@types/react-dom": "18.3.0",
-     "vitest": "2.1.4"
+      "@types/react": "^18.2.15",
+      "@types/react-dom": "^18.2.7",
+      "@vitejs/plugin-react": "^5.1.0",
+      "autoprefixer": "^10.4.15",
+      "postcss": "^8.4.29",
+      "tailwindcss": "^3.3.3",
+      "typescript": "^5.0.2",
+      "vite": "^4.4.9",
+      "vitest": "^0.34.4"
    }
- }
-
-
+}

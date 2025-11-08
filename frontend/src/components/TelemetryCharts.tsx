@@ -10,9 +10,9 @@
 
  Chart.register(LineController, LineElement, PointElement, LinearScale, Title)
 
- type Props = { backend: string }
+type Props = { backend: string, cars: any[] }
 
- export function TelemetryCharts({ backend }: Props) {
+export function TelemetryCharts({ backend, cars }: Props) {
    const canvasRef = useRef<HTMLCanvasElement | null>(null)
    const chartRef = useRef<Chart | null>(null)
 
