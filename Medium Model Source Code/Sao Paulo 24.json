@@ -1,0 +1,122 @@
+[
+  {
+    "Driver": "Lando",
+    "Avg Speed in Fastest Lap": 190.296,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [29, 33]
+  },
+  {
+    "Driver": "George",
+    "Avg Speed in Fastest Lap": 189.998,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [29, 33]
+  },
+  {
+    "Driver": "Yuki",
+    "Avg Speed in Fastest Lap": 189.573,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [29, 33]
+  },
+  {
+    "Driver": "Esteban",
+    "Avg Speed in Fastest Lap": 189.705,
+    "Number of Pit Stops": 1,
+    "Lap Numbers": [33]
+  },
+  {
+    "Driver": "Liam",
+    "Avg Speed in Fastest Lap": 188.846,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [29, 33]
+  },
+  {
+    "Driver": "Charles",
+    "Avg Speed in Fastest Lap": 190.03,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [25, 33]
+  },
+  {
+    "Driver": "Albon",
+    "Avg Speed in Fastest Lap": 0,
+    "Number of Pit Stops": 0,
+    "Lap Numbers": [0]
+  },
+  {
+    "Driver": "Oscar",
+    "Avg Speed in Fastest Lap": 190.261,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Alonso",
+    "Avg Speed in Fastest Lap": 188.502,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Stroll",
+    "Avg Speed in Fastest Lap": 0,
+    "Number of Pit Stops": 0,
+    "Lap Numbers": [0]
+  },
+  {
+    "Driver": "Bottas",
+    "Avg Speed in Fastest Lap": 187.173,
+    "Number of Pit Stops": 1,
+    "Lap Numbers": [33]
+  },
+  {
+    "Driver": "Sergio",
+    "Avg Speed in Fastest Lap": 188.892,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Carlos",
+    "Avg Speed in Fastest Lap": 184.23,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Gasly",
+    "Avg Speed in Fastest Lap": 189.998,
+    "Number of Pit Stops": 1,
+    "Lap Numbers": [33]
+  },
+  {
+    "Driver": "Lewis",
+    "Avg Speed in Fastest Lap": 189.081,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Ollie",
+    "Avg Speed in Fastest Lap": 188.042,
+    "Number of Pit Stops": 2,
+    "Lap Numbers": [28, 33]
+  },
+  {
+    "Driver": "Franco",
+    "Avg Speed in Fastest Lap": 184.022,
+    "Number of Pit Stops": 1,
+    "Lap Numbers": [27]
+  },
+  {
+    "Driver": "Max",
+    "Avg Speed in Fastest Lap": 192.767,
+    "Number of Pit Stops": 1,
+    "Lap Numbers": [33]
+  },
+  {
+    "Driver": "Nico",
+    "Avg Speed in Fastest Lap": 185.191,
+    "Number of Pit Stops": 3,
+    "Lap Numbers": [26, 28, 30]
+  },
+  {
+    "Driver": "Zhou",
+    "Avg Speed in Fastest Lap": 186.765,
+    "Number of Pit Stops": 4,
+    "Lap Numbers": [28, 29, 32, 33]
+  }
+]
