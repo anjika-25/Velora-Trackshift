@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { LoadingIntro } from './components/LoadingIntro';
 import { TrackSelection } from './components/TrackSelection';
-import { RaceSetupForm, RaceSettings } from './components/RaceSetupForm';
-import { RaceDashboard } from './components/RaceDashboard';
-import { Track, TrackName, WeatherCondition, TyreCompound } from './types/models';
-import { tracks } from './utils/trackData';
+import { TrackName } from './types/models';
 import { Socket } from 'socket.io-client';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import VeloraDashboard from './components/VeloraDashboard.jsx';
 
 // Backend URL configuration
 const backend = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
@@ -18,8 +17,6 @@ export function App(): JSX.Element {
   
   // App flow state
   const [showIntro, setShowIntro] = useState(true);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
-  const [raceSettings, setRaceSettings] = useState<RaceSettings | null>(null);
 
   useEffect(() => {
     let socket: Socket | null = null;
@@ -96,20 +93,8 @@ export function App(): JSX.Element {
   };
 
   const handleTrackSelect = (trackName: TrackName) => {
-    setSelectedTrack(tracks[trackName]);
-  };
-
-  const handleRaceSettings = (settings: RaceSettings) => {
-    setRaceSettings(settings);
-  };
-
-  const handleBackToTracks = () => {
-    setSelectedTrack(null);
-    setRaceSettings(null);
-  };
-
-  const handleBackToSetup = () => {
-    setRaceSettings(null);
+    // Track selected - stay on track selection to allow selecting another track
+    console.log('Selected track:', trackName);
   };
 
   if (!connected) {
@@ -150,24 +135,18 @@ export function App(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen text-white bg-[#0b1020]">
-      {showIntro && <LoadingIntro onComplete={handleIntroComplete} />}
-      
-      {!showIntro && !selectedTrack && (
-        <TrackSelection onSelectTrack={handleTrackSelect} />
-      )}
-      
-      {selectedTrack && !raceSettings && (
-        <RaceSetupForm onStartRace={handleRaceSettings} onBack={handleBackToTracks} />
-      )}
-      
-      {selectedTrack && raceSettings && (
-        <RaceDashboard 
-          track={selectedTrack}
-          raceSettings={raceSettings}
-          onBack={handleBackToSetup}
-        />
-      )}
-    </div>
+    <Router>
+      <div className="min-h-screen text-white bg-[#0b1020]">
+        {showIntro && <LoadingIntro onComplete={handleIntroComplete} />}
+        
+        {!showIntro && (
+          <Routes>
+            <Route path="/" element={<TrackSelection onSelectTrack={handleTrackSelect} />} />
+            <Route path="/dashboard/:trackName" element={<VeloraDashboard />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        )}
+      </div>
+    </Router>
   );
 }

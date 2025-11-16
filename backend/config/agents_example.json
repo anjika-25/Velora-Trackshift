@@ -1,8 +1,0 @@
- {
-   "cars": [
-     {"id": 1, "engine_power": 450000, "cd": 0.9, "area": 1.6, "mass": 740},
-     {"id": 2, "engine_power": 440000, "cd": 0.92, "area": 1.6, "mass": 742}
-   ]
- }
-
-

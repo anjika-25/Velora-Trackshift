@@ -1,5 +1,4 @@
 import { Track, TrackName, TrackType } from '../types/models';
-import { pythonTrackToCheckpoints } from './pythonTrackLoader';
 import silverstoneImage from '../assets/1.png';
 import interlagosImage from '../assets/4.png';
 import nurburgringImage from '../assets/5.png';
@@ -22,18 +21,17 @@ const generateCheckpoints = (): [number, number, number][] => [
   [0.9, 0.5, 0]     // Finish line
 ];
 
-// Helper function to create a track with Python track data
+// Helper function to create a track
 const createTrack = (
   id: string,
   name: TrackName,
   type: TrackType,
   description: string,
   previewImage: string,
-  trackNumber: number,
   checkpoints?: [number, number, number][]
 ): Track => {
-  // Use Python track checkpoints if available, otherwise use provided or default
-  const finalCheckpoints = checkpoints || pythonTrackToCheckpoints(trackNumber) || generateCheckpoints();
+  // Use provided checkpoints or default checkpoints
+  const finalCheckpoints = checkpoints || generateCheckpoints();
   
   // Calculate start line from first checkpoint
   const startCheckpoint = finalCheckpoints[0] || [0.1, 0.5, 0];
@@ -65,79 +63,69 @@ const createTrack = (
 };
 
 // Track mapping: Image number → Track configuration
-// Each track is connected to its Python track file (track__{number}.py)
 export const tracks: Record<TrackName, Track> = {
   'Silverstone': createTrack(
     'silverstone',
     'Silverstone',
     'grandPrix',
-    'The home of British motorsport, known for its high-speed corners and challenging weather conditions. Connected to track__1.py',
-    silverstoneImage,
-    1 // Maps to track__1.py
+    'The home of British motorsport, known for its high-speed corners and challenging weather conditions.',
+    silverstoneImage
   ),
   'Interlagos': createTrack(
     'interlagos',
     'Interlagos',
     'grandPrix',
-    'The legendary Brazilian circuit with dramatic elevation changes and unpredictable weather. Connected to track__4.py',
-    interlagosImage,
-    4 // Maps to track__4.py
+    'The legendary Brazilian circuit with dramatic elevation changes and unpredictable weather.',
+    interlagosImage
   ),
   'Nürburgring': createTrack(
     'nurburgring',
     'Nürburgring',
     'circuit',
-    'The Green Hell - One of the most challenging and dangerous circuits in the world. Connected to track__5.py',
-    nurburgringImage,
-    5 // Maps to track__5.py
+    'The Green Hell - One of the most challenging and dangerous circuits in the world.',
+    nurburgringImage
   ),
   'Laguna Seca': createTrack(
     'laguna-seca',
     'Laguna Seca',
     'circuit',
-    'Famous for the iconic Corkscrew turn, a technical circuit with dramatic elevation changes. Connected to track__6.py',
-    lagunaSecaImage,
-    6 // Maps to track__6.py
+    'Famous for the iconic Corkscrew turn, a technical circuit with dramatic elevation changes.',
+    lagunaSecaImage
   ),
   'Brands Hatch': createTrack(
     'brands-hatch',
     'Brands Hatch',
     'circuit',
-    'A classic British circuit with fast, flowing corners and challenging elevation changes. Connected to track__7.py',
-    brandsHatchImage,
-    7 // Maps to track__7.py
+    'A classic British circuit with fast, flowing corners and challenging elevation changes.',
+    brandsHatchImage
   ),
   'Watkins Glen': createTrack(
     'watkins-glen',
     'Watkins Glen',
     'circuit',
-    'The historic American circuit known for its fast straights and technical sections. Connected to track__8.py',
-    watkinsGlenImage,
-    8 // Maps to track__8.py
+    'The historic American circuit known for its fast straights and technical sections.',
+    watkinsGlenImage
   ),
   'Road America': createTrack(
     'road-america',
     'Road America',
     'circuit',
-    'A long, fast circuit through the Wisconsin countryside with challenging corners. Connected to track__9.py',
-    roadAmericaImage,
-    9 // Maps to track__9.py
+    'A long, fast circuit through the Wisconsin countryside with challenging corners.',
+    roadAmericaImage
   ),
   'Barcelona': createTrack(
     'barcelona',
     'Barcelona',
     'grandPrix',
-    'Circuit de Barcelona-Catalunya, a technical track that tests both car and driver. Connected to track__10.py',
-    barcelonaImage,
-    10 // Maps to track__10.py
+    'Circuit de Barcelona-Catalunya, a technical track that tests both car and driver.',
+    barcelonaImage
   ),
   'COTA': createTrack(
     'cota',
     'COTA',
     'grandPrix',
-    'Circuit of the Americas - A modern American F1 circuit with challenging elevation changes. Connected to track__12.py',
-    cotaImage,
-    12 // Maps to track__12.py
+    'Circuit of the Americas - A modern American F1 circuit with challenging elevation changes.',
+    cotaImage
   )
 };
 

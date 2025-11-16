@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { TrackName, Track } from '../types/models';
 import { tracks } from '../utils/trackData';
 import '../styles/track-selection.css';
 
 interface TrackSelectionProps {
-  onSelectTrack: (track: TrackName) => void;
+  onSelectTrack?: (track: TrackName) => void;
 }
 
 const TrackCard: React.FC<{ track: Track; onSelect: () => void; index: number }> = ({ track, onSelect, index }) => {
@@ -73,6 +74,16 @@ const TrackCard: React.FC<{ track: Track; onSelect: () => void; index: number }>
 };
 
 export const TrackSelection: React.FC<TrackSelectionProps> = ({ onSelectTrack }) => {
+  const navigate = useNavigate();
+
+  const handleTrackSelect = (trackName: TrackName) => {
+    if (onSelectTrack) {
+      onSelectTrack(trackName);
+    }
+    // Navigate to dashboard with track parameter
+    navigate(`/dashboard/${trackName}`);
+  };
+
   return (
     <div className="track-selection-container">
       <div className="track-selection-header">
@@ -100,7 +111,7 @@ export const TrackSelection: React.FC<TrackSelectionProps> = ({ onSelectTrack })
             key={track.id}
             track={track}
             index={index}
-            onSelect={() => onSelectTrack(track.name as TrackName)}
+            onSelect={() => handleTrackSelect(track.name as TrackName)}
           />
         ))}
       </div>
